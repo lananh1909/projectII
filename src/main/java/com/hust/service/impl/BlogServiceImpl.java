@@ -1,16 +1,23 @@
 package com.hust.service.impl;
 
 import com.hust.config.JpaAuditingConfig;
+import com.hust.converter.BlogConverter;
+import com.hust.entity.ActivityEntity;
 import com.hust.entity.BlogEntity;
+import com.hust.entity.ListImage;
 import com.hust.model.AddBlogInputModel;
-import com.hust.repo.BlogRepo;
-import com.hust.repo.UserRepo;
+import com.hust.model.BlogOutPutModel;
+import com.hust.model.BlogPaging;
+import com.hust.repo.*;
 import com.hust.service.BlogService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,6 +28,15 @@ public class BlogServiceImpl implements BlogService {
     @Autowired
     BlogRepo blogRepo;
 
+    @Autowired
+    ListImageRepo listImageRepo;
+
+    @Autowired
+    FileDBRepo fileDBRepo;
+
+    @Autowired
+    ActivityRepo activityRepo;
+
     @Override
     public BlogEntity save(AddBlogInputModel input) {
         BlogEntity blog = new BlogEntity();
@@ -29,13 +45,13 @@ public class BlogServiceImpl implements BlogService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         blog.setUser(userRepo.findByUsername(authentication.getName()));
         blog = blogRepo.save(blog);
+        for(long i: input.getListImage()){
+            ListImage img = new ListImage();
+            img.setBlog(blog);
+            img.setImage(fileDBRepo.findById(i));
+            listImageRepo.save(img);
+        }
         return blog;
-    }
-
-    @Override
-    public List<BlogEntity> findAll() {
-        List<BlogEntity> blogs = blogRepo.findAll();
-        return blogs;
     }
 
     @Override
@@ -44,11 +60,77 @@ public class BlogServiceImpl implements BlogService {
         blog.setTitle(input.getTitle());
         blog.setContent(input.getContent());
         blog = blogRepo.save(blog);
+        List<ListImage> list = listImageRepo.findByBlogId(id);
+        listImageRepo.deleteAll(list);
+        for(long i: input.getListImage()){
+            ListImage img = new ListImage();
+            img.setBlog(blog);
+            img.setImage(fileDBRepo.findById(i));
+            listImageRepo.save(img);
+        }
+        for(ListImage i: list){
+            List<ActivityEntity> acts = activityRepo.findByImage(i.getImage());
+            List<ListImage> re = listImageRepo.findByImageId(i.getImage().getId());
+            if(re.size() == 0 && acts.size() == 0){
+                fileDBRepo.delete(i.getImage());
+            }
+        }
         return blog;
     }
 
     @Override
     public void delete(long id) {
+        List<ListImage> images = listImageRepo.findByBlogId(id);
         blogRepo.deleteById(id);
+        for(ListImage i: images){
+            List<ActivityEntity> acts = activityRepo.findByImage(i.getImage());
+            List<ListImage> re = listImageRepo.findByImageId(i.getImage().getId());
+            if(re.size() <= 1 && acts.size() == 0){
+                fileDBRepo.delete(i.getImage());
+            }
+        }
+    }
+
+    @Override
+    public BlogPaging findAll(Pageable pageable) {
+        Page<BlogEntity> blogs = blogRepo.findAll(pageable);
+        List<BlogEntity> list = blogs.getContent();
+        List<BlogOutPutModel> out = new ArrayList<>();
+        for(BlogEntity b: list){
+            List<ListImage> img = listImageRepo.findByBlogId(b.getId());
+            List<Long> id = new ArrayList<>();
+            for(ListImage i: img){
+                id.add(i.getImage().getId());
+            }
+            out.add(BlogConverter.toOutputModel(b, id));
+        }
+        return new BlogPaging(blogs.getNumber(), blogs.getTotalElements(), blogs.getTotalPages(), out);
+    }
+
+    @Override
+    public BlogPaging findAllByTitle(String title, Pageable pageable) {
+        Page<BlogEntity> blogs = blogRepo.findByTitleContainingIgnoreCase(title, pageable);
+        List<BlogEntity> list = blogs.getContent();
+        List<BlogOutPutModel> out = new ArrayList<>();
+        for(BlogEntity b: list){
+            List<ListImage> img = listImageRepo.findByBlogId(b.getId());
+            List<Long> id = new ArrayList<>();
+            for(ListImage i: img){
+                id.add(i.getImage().getId());
+            }
+            out.add(BlogConverter.toOutputModel(b, id));
+        }
+        return new BlogPaging(blogs.getNumber(), blogs.getTotalElements(), blogs.getTotalPages(), out);
+    }
+
+    @Override
+    public BlogOutPutModel getBlog(long id) {
+        BlogEntity blog = blogRepo.findOneById(id);
+        List<ListImage> img = listImageRepo.findByBlogId(id);
+        List<Long> imgs = new ArrayList<>();
+        for(ListImage i: img){
+            imgs.add(i.getImage().getId());
+        }
+        return BlogConverter.toOutputModel(blog, imgs);
     }
 }

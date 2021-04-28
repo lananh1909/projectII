@@ -57,6 +57,10 @@ public class WebSecurityConfig extends org.springframework.security.config.annot
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests().antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/api/test/**").permitAll()
+                .antMatchers("/address/**").permitAll()
+                .antMatchers("/activity/**").permitAll()
+                .antMatchers("/files/**").permitAll()
+                .antMatchers("/blog/**").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

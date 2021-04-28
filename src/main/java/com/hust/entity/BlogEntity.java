@@ -1,20 +1,37 @@
 package com.hust.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "\"blogs\"")
+
 public class BlogEntity extends BaseEntity{
-    @Column
+    @Column(columnDefinition="TEXT")
     private String title;
 
-    @Column
+    @Column(columnDefinition="TEXT")
     private String Content;
+
+    @OneToMany(mappedBy = "blog", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<ListImage> images = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "posted_by")
     private UserEntity user;
+
+    public List<ListImage> getImages() {
+        return images;
+    }
+
+    public void setImages(List<ListImage> images) {
+        this.images = images;
+    }
 
     public String getTitle() {
         return title;

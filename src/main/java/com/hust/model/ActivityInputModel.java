@@ -1,5 +1,7 @@
 package com.hust.model;
 
+import java.util.Date;
+
 public class ActivityInputModel {
     private String title;
     private String content;
@@ -7,6 +9,33 @@ public class ActivityInputModel {
     private String communeId;
     private long topicId;
     private long userId;
+    private long fileId;
+    private Date fromDate;
+    private Date toDate;
+
+    public Date getFromDate() {
+        return fromDate;
+    }
+
+    public void setFromDate(Date fromDate) {
+        this.fromDate = fromDate;
+    }
+
+    public Date getToDate() {
+        return toDate;
+    }
+
+    public void setToDate(Date toDate) {
+        this.toDate = toDate;
+    }
+
+    public long getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(long fileId) {
+        this.fileId = fileId;
+    }
 
     public String getTitle() {
         return title;

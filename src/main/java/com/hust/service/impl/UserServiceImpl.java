@@ -21,9 +21,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity save(AddUserInputModel user) {
         UserEntity userEntity = new UserEntity();
-        userEntity.setUsername(user.getUsername());
+        userEntity.setUsername(user.getUsername().toLowerCase());
         userEntity.setPassword(user.getPassword());
-        userEntity.setEmail(user.getEmail());
+        userEntity.setEmail(user.getEmail().toLowerCase());
         userEntity.setRole(roleRepo.findOneById(user.getRoleId()));
         userEntity = userRepo.save(userEntity);
         return userEntity;
@@ -38,9 +38,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserEntity save(AddUserInputModel input, long id) {
         UserEntity user = userRepo.getOne(id);
-        user.setUsername(input.getUsername());
+        user.setUsername(input.getUsername().toLowerCase());
         user.setPassword(input.getPassword());
-        user.setEmail(input.getEmail());
+        user.setEmail(input.getEmail().toLowerCase());
         user.setRole(roleRepo.findOneById(input.getRoleId()));
         user = userRepo.save(user);
         return user;

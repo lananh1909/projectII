@@ -5,18 +5,19 @@ import com.hust.address.entity.Commune;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
 @Table(name = "\"activity\"")
 public class ActivityEntity extends BaseEntity{
-    @Column
+    @Column(columnDefinition="TEXT")
     private String title;
 
-    @Column
+    @Column(columnDefinition="TEXT")
     private String content;
 
-    @Column
+    @Column(columnDefinition="TEXT")
     private String location;
 
     @ManyToOne
@@ -31,9 +32,43 @@ public class ActivityEntity extends BaseEntity{
     @JoinColumn(name = "posted_by")
     private UserEntity user;
 
-    @OneToMany(mappedBy = "activity")
+    @Column
+    private Date fromDate;
+
+    @Column
+    private Date toDate;
+
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<AttendEntity> attendees = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "image", referencedColumnName = "id")
+    private FileDB image;
+
+    public Date getFromDate() {
+        return fromDate;
+    }
+
+    public void setFromDate(Date fromDate) {
+        this.fromDate = fromDate;
+    }
+
+    public Date getToDate() {
+        return toDate;
+    }
+
+    public void setToDate(Date toDate) {
+        this.toDate = toDate;
+    }
+
+    public FileDB getImage() {
+        return image;
+    }
+
+    public void setImage(FileDB image) {
+        this.image = image;
+    }
 
     public String getTitle() {
         return title;

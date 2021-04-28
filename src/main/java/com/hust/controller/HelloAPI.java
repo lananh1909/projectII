@@ -63,11 +63,11 @@ public class HelloAPI {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody AddUserInputModel signupRequest){
-        if(userRepo.existsByUsername(signupRequest.getUsername())){
+        if(userRepo.existsByUsername(signupRequest.getUsername().toLowerCase())){
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
 
-        if(userRepo.existsByEmail(signupRequest.getEmail())){
+        if(userRepo.existsByEmail(signupRequest.getEmail().toLowerCase())){
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
         }
         if(signupRequest.getRoleId() == null){

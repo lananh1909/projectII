@@ -1,6 +1,8 @@
 package com.hust.service.impl;
 
+import com.hust.entity.ActivityEntity;
 import com.hust.entity.AttendEntity;
+import com.hust.entity.id.AttendId;
 import com.hust.model.AttendInputModel;
 import com.hust.repo.ActivityRepo;
 import com.hust.repo.AttendRepo;
@@ -42,7 +44,12 @@ public class AttendServiceImpl implements AttendService {
     }
 
     @Override
-    public void delete(long id) {
-        attendRepo.deleteById(id);
+    public void deleteAttend(AttendId id) {
+        attendRepo.delete(attendRepo.findByActivityIdAndVolunteerId(id.getActivity(), id.getVolunteer()));
+    }
+
+    @Override
+    public List<AttendEntity> findByActivity(long id) {
+        return attendRepo.findByActivityId(id);
     }
 }
