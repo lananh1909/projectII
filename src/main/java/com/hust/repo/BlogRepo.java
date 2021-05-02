@@ -13,5 +13,5 @@ public interface BlogRepo extends JpaRepository<BlogEntity, Long> {
     BlogEntity findOneById(long id);
     List<BlogEntity> findAll();
     BlogEntity save(BlogEntity blog);
-    Page<BlogEntity> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+    Page<BlogEntity> findByTitleLikeIgnoreCase(String title, Pageable pageable);
 }

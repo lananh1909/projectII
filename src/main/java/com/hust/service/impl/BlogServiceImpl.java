@@ -44,13 +44,14 @@ public class BlogServiceImpl implements BlogService {
         blog.setContent(input.getContent());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         blog.setUser(userRepo.findByUsername(authentication.getName()));
-        blog = blogRepo.save(blog);
+        List<ListImage> imgs = new ArrayList<>();
         for(long i: input.getListImage()){
             ListImage img = new ListImage();
             img.setBlog(blog);
             img.setImage(fileDBRepo.findById(i));
-            listImageRepo.save(img);
+            imgs.add(img);
         }
+        blog = blogRepo.save(blog);
         return blog;
     }
 
@@ -109,7 +110,9 @@ public class BlogServiceImpl implements BlogService {
 
     @Override
     public BlogPaging findAllByTitle(String title, Pageable pageable) {
-        Page<BlogEntity> blogs = blogRepo.findByTitleContainingIgnoreCase(title, pageable);
+        String a = "%x%";
+        a = a.replaceAll("x", title.replaceAll(" ", "%"));
+        Page<BlogEntity> blogs = blogRepo.findByTitleLikeIgnoreCase(a, pageable);
         List<BlogEntity> list = blogs.getContent();
         List<BlogOutPutModel> out = new ArrayList<>();
         for(BlogEntity b: list){

@@ -15,5 +15,5 @@ public interface ActivityRepo extends JpaRepository<ActivityEntity, Long> {
     ActivityEntity save(ActivityEntity act);
     ActivityEntity findById(long id);
     List<ActivityEntity> findByImage(FileDB image);
-    Page<ActivityEntity> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+    Page<ActivityEntity> findByTitleLikeIgnoreCase(String title, Pageable pageable);
 }

@@ -90,7 +90,7 @@ public class ActivityServiceImpl implements ActivityService {
         activityRepo.delete(ac);
         List<ActivityEntity> acts = activityRepo.findByImage(ac.getImage());
         List<ListImage> imgs = listImageRepo.findByImageId(ac.getImage().getId());
-        if(acts.size() == 1 && imgs.size() == 0){
+        if(acts.size() == 0 && imgs.size() == 0){
             fileDBRepo.delete(ac.getImage());
         }
     }
@@ -123,11 +123,13 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public ActivityPaging findAllByTitle(String title, Pageable pageable) {
-        Page<ActivityEntity> activities = activityRepo.findByTitleContainingIgnoreCase(title, pageable);
+        String a = "%x%";
+        a = a.replaceAll("x", title.replaceAll(" ", "%"));
+        Page<ActivityEntity> activities = activityRepo.findByTitleLikeIgnoreCase(a, pageable);
         List<ActivityEntity> acts = activities.getContent();
         List<ActivityOutputModel> out = new ArrayList<>();
-        for (ActivityEntity a : acts) {
-            out.add(ActivityConverter.toOutPutModel(a));
+        for (ActivityEntity act : acts) {
+            out.add(ActivityConverter.toOutPutModel(act));
         }
         return new ActivityPaging(activities.getNumber(), activities.getTotalElements(), activities.getTotalPages(), out);
     }
