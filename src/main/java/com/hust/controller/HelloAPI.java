@@ -11,6 +11,7 @@ import com.hust.repo.UserRepo;
 import com.hust.security.jwt.JwtUtils;
 import com.hust.security.services.UserDetailsImpl;
 import com.hust.service.UserService;
+import com.hust.service.VolunteerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -45,6 +46,9 @@ public class HelloAPI {
 
     @Autowired
     UserService userService;
+    
+    @Autowired
+    VolunteerService volunteerService;
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest){
@@ -52,12 +56,17 @@ public class HelloAPI {
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
-
+        
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        VolunteerOutPutModel vol = volunteerService.findById(userDetails.getId());
+        boolean firstLogin = true;
+        if(vol != null){
+            firstLogin = false;
+        }
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
+        return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles, firstLogin));
 
     }
 
@@ -77,5 +86,10 @@ public class HelloAPI {
         signupRequest.setPassword(encoder.encode(signupRequest.getPassword()));
         UserEntity user = userService.save(signupRequest);
         return ResponseEntity.ok().body(new MessageResponse("User registered successfully!"));
+    }
+
+    @GetMapping("/statistic")
+    public ResponseEntity<?> getStatistical(){
+        return ResponseEntity.ok().body(userService.getStatistical());
     }
 }

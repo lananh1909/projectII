@@ -17,6 +17,7 @@ import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@RequestMapping("/file")
 public class FileDBAPIController {
     @Autowired
     FileDBService fileDBService;
@@ -35,7 +36,7 @@ public class FileDBAPIController {
         }
     }
 
-    @GetMapping("/files")
+    @GetMapping("")
     public ResponseEntity<?> getListFiles() {
         List<ResponseFileModel> files = new ArrayList<>();
         List<FileDB> list = fileDBService.getAllFiles();
@@ -50,14 +51,14 @@ public class FileDBAPIController {
         return ResponseEntity.ok().body(files);
     }
 
-    @GetMapping("/files/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getFile(@PathVariable("id") long id){
         FileDB fileDB = fileDBService.getFile(id);
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename = \"" + fileDB.getName() + "\"")
                 .body(fileDB.getData());
     }
 
-    @DeleteMapping("/delete-files/{id}")
+    @DeleteMapping("/delete/{id}")
     public void delete(@PathVariable("id") long id){
         fileDBService.deleteFile(id);
     }

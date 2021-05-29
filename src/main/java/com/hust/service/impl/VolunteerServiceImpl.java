@@ -1,10 +1,13 @@
 package com.hust.service.impl;
 
 import com.hust.address.repo.CommuneRepo;
+import com.hust.converter.Converter;
 import com.hust.entity.ActivityEntity;
 import com.hust.entity.AttendEntity;
+import com.hust.entity.UserEntity;
 import com.hust.entity.VolunteerEntity;
 import com.hust.model.VolunteerInputModel;
+import com.hust.model.VolunteerOutPutModel;
 import com.hust.repo.AttendRepo;
 import com.hust.repo.UserRepo;
 import com.hust.repo.VolunteerRepo;
@@ -30,38 +33,47 @@ public class VolunteerServiceImpl implements VolunteerService {
     AttendRepo attendRepo;
 
     @Override
-    public VolunteerEntity save(VolunteerInputModel volunteer) {
-        VolunteerEntity vol = new VolunteerEntity();
+    public VolunteerEntity save(VolunteerInputModel volunteer, String username) {
+        UserEntity user = userRepo.findByUsername(username);
+        VolunteerEntity vol = volunteerRepo.findByUser(user);
+        if(vol == null){
+            vol = new VolunteerEntity();
+        }
         vol.setFullName(volunteer.getFullName());
         vol.setBirthDate(volunteer.getBirthDate());
         vol.setPhoneNum(volunteer.getPhoneNum());
         vol.setCommune(communeRepo.findByCommuneId(volunteer.getCommuneId()));
-        vol.setUser(userRepo.findById(volunteer.getUserId()));
+        vol.setUser(user);
+        vol.setGender(volunteer.getGender());
         vol = volunteerRepo.save(vol);
         return vol;
     }
 
     @Override
-    public List<VolunteerEntity> findAll() {
+    public List<VolunteerOutPutModel> findAll() {
         List<VolunteerEntity> volunteers = volunteerRepo.findAll();
-        return volunteers;
+        List<VolunteerOutPutModel> vols = new ArrayList<>();
+        for(VolunteerEntity v: volunteers){
+            long num = attendRepo.countByVolunteerId(v.getId());
+            vols.add(Converter.toOutputModel(v, num));
+        }
+        return vols;
     }
 
     @Override
-    public VolunteerEntity save(VolunteerInputModel input, long id) {
-        VolunteerEntity volunteer = volunteerRepo.findById(id);
-        volunteer.setFullName(input.getFullName());
-        volunteer.setBirthDate(input.getBirthDate());
-        volunteer.setPhoneNum(input.getPhoneNum());
-        volunteer.setCommune(communeRepo.findByCommuneId(input.getCommuneId()));
-        volunteer.setUser(userRepo.findById(input.getUserId()));
-        volunteer = volunteerRepo.save(volunteer);
-        return volunteer;
+    public VolunteerOutPutModel findById(long id) {
+        VolunteerEntity volunteer = volunteerRepo.findByUserId(id);
+        if(volunteer != null) {
+            long num = attendRepo.countByVolunteerId(volunteer.getId());
+            return Converter.toOutputModel(volunteer, num);
+        }
+        return null;
     }
+
 
     @Override
     public void delete(long id) {
-        volunteerRepo.deleteById(id);
+        volunteerRepo.deleteByUserId(id);
     }
 
     @Override

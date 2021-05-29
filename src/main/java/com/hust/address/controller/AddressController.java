@@ -27,19 +27,19 @@ public class AddressController {
 	private CommuneService communeService;
 	
 	
-	@GetMapping("/get-all-province")
+	@GetMapping("/provinces")
 	public ResponseEntity<?> getAllProvince(){
 		List<Province> depts = provinceService.getAllProvince();
 		return ResponseEntity.ok().body(depts);
 	}
 	
-	@PostMapping("/get-all-district")
+	@PostMapping("/districts")
 	public ResponseEntity<?> getAllDistrict(Principal principal, @RequestBody InputModelDistrict input){
 		List<District> dis = districtService.getAllDistrict(input.getProvinceId());
 		return ResponseEntity.ok().body(dis);
 	}
 	
-	@PostMapping("/get-all-commune")
+	@PostMapping("/communes")
 	public ResponseEntity<?> getAllCommune(Principal principal, @RequestBody InputModelCommune input){
 		List<Commune> com = communeService.getAllCommune(input.getDistrictId());
 		return ResponseEntity.ok().body(com);

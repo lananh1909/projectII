@@ -10,9 +10,20 @@ import java.util.List;
 
 @Entity
 @Table(name = "\"volunteer\"")
-public class VolunteerEntity extends BaseEntity{
+public class VolunteerEntity{
+    @Id
+    private long id;
+
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @MapsId
+    private UserEntity user;
+
     @Column
     private String fullName;
+
+    @Column
+    private String gender;
 
     @Column
     private String phoneNum;
@@ -24,13 +35,25 @@ public class VolunteerEntity extends BaseEntity{
     @JoinColumn(name = "commune_id")
     private Commune commune;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    private UserEntity user;
-
-    @OneToMany(mappedBy = "volunteer")
+    @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<AttendEntity> attends = new ArrayList<>();
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
 
     public List<AttendEntity> getAttends() {
         return attends;

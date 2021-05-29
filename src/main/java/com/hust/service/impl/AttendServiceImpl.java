@@ -4,8 +4,10 @@ import com.hust.entity.ActivityEntity;
 import com.hust.entity.AttendEntity;
 import com.hust.entity.id.AttendId;
 import com.hust.model.AttendInputModel;
+import com.hust.model.StatisticalOutput;
 import com.hust.repo.ActivityRepo;
 import com.hust.repo.AttendRepo;
+import com.hust.repo.CustomRepo;
 import com.hust.repo.VolunteerRepo;
 import com.hust.service.AttendService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,8 @@ public class AttendServiceImpl implements AttendService {
     VolunteerRepo volunteerRepo;
     @Autowired
     ActivityRepo activityRepo;
+    @Autowired
+    CustomRepo customRepo;
 
     @Override
     public List<AttendEntity> findAll() {
@@ -28,14 +32,14 @@ public class AttendServiceImpl implements AttendService {
     }
 
     @Override
-    public AttendEntity save(AttendInputModel input) {
-        AttendEntity attend = attendRepo.findByActivityIdAndVolunteerId(input.getActivityId(), input.getVolunteerId());
+    public AttendEntity save(AttendInputModel input, long id) {
+        AttendEntity attend = attendRepo.findByActivityIdAndVolunteerId(input.getActivityId(), id);
         if(attend != null){
             attend.setSkill(input.getSkill());
             attendRepo.save(attend);
         } else {
             attend = new AttendEntity();
-            attend.setVolunteer(volunteerRepo.findById(input.getVolunteerId()));
+            attend.setVolunteer(volunteerRepo.findByUserId(id));
             attend.setActivity(activityRepo.findById(input.getActivityId()));
             attend.setSkill(input.getSkill());
             attend = attendRepo.save(attend);
@@ -51,5 +55,15 @@ public class AttendServiceImpl implements AttendService {
     @Override
     public List<AttendEntity> findByActivity(long id) {
         return attendRepo.findByActivityId(id);
+    }
+
+    @Override
+    public List<AttendEntity> findByVolunteer(long id) {
+        return attendRepo.findByVolunteerId(id);
+    }
+
+    @Override
+    public List<StatisticalOutput> getStatistic() {
+        return customRepo.getCountAttend();
     }
 }

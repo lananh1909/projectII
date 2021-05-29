@@ -17,7 +17,8 @@ public interface ActivityService {
     void delete(long id);
     List<VolunteerEntity> getVolunteers(long id);
     ActivityOutputModel getActiviy(long id);
-    ActivityPaging findAll(Pageable pageable);
+    ActivityPaging findAll(long topic, String districtId, Pageable pageable);
 
-    ActivityPaging findAllByTitle(String title, Pageable pageable);
+    ActivityPaging findAllByTitle(String title, long topic, String districtId, Pageable pageable);
+    List<ActivityOutputModel> getFollowing();
 }

@@ -14,5 +14,6 @@ public interface AttendRepo extends JpaRepository<AttendEntity, AttendId> {
     AttendEntity save(AttendEntity attend);
     List<AttendEntity> findByActivityId(long id);
     List<AttendEntity> findByVolunteerId(long id);
+    long countByVolunteerId(long id);
     AttendEntity findByActivityIdAndVolunteerId(long actId, long volId);
 }

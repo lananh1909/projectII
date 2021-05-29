@@ -1,7 +1,7 @@
 package com.hust.service.impl;
 
 import com.hust.address.repo.CommuneRepo;
-import com.hust.converter.ActivityConverter;
+import com.hust.converter.Converter;
 import com.hust.entity.ActivityEntity;
 import com.hust.entity.AttendEntity;
 import com.hust.entity.ListImage;
@@ -16,7 +16,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -47,7 +50,7 @@ public class ActivityServiceImpl implements ActivityService {
         List<ActivityEntity> acts = activityRepo.findAll();
         List<ActivityOutputModel> out = new ArrayList<>();
         for(ActivityEntity a: acts){
-            out.add(ActivityConverter.toOutPutModel(a));
+            out.add(Converter.toOutPutModel(a));
         }
         return out;
     }
@@ -107,30 +110,57 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public ActivityOutputModel getActiviy(long id) {
-        return ActivityConverter.toOutPutModel(activityRepo.findById(id));
+        return Converter.toOutPutModel(activityRepo.findById(id));
     }
 
     @Override
-    public ActivityPaging findAll(Pageable pageable) {
-        Page<ActivityEntity> activities = activityRepo.findAll(pageable);
+    public ActivityPaging findAll(long topic, String districtId, Pageable pageable) {
+        Page<ActivityEntity> activities;
+        if(topic != 0){
+            activities = activityRepo.findByTopicId(topic, pageable);
+        } else if(!districtId.equals("0")){
+            activities = activityRepo.findByCommune_District_DistrictId(districtId, pageable);
+        } else {
+            activities = activityRepo.findAll(pageable);
+        }
         List<ActivityEntity> acts = activities.getContent();
         List<ActivityOutputModel> out = new ArrayList<>();
         for (ActivityEntity a : acts) {
-            out.add(ActivityConverter.toOutPutModel(a));
+            out.add(Converter.toOutPutModel(a));
         }
         return new ActivityPaging(activities.getNumber(), activities.getTotalElements(), activities.getTotalPages(), out);
     }
 
     @Override
-    public ActivityPaging findAllByTitle(String title, Pageable pageable) {
+    public ActivityPaging findAllByTitle(String title, long topic, String districtId, Pageable pageable) {
         String a = "%x%";
         a = a.replaceAll("x", title.replaceAll(" ", "%"));
-        Page<ActivityEntity> activities = activityRepo.findByTitleLikeIgnoreCase(a, pageable);
+        Page<ActivityEntity> activities;
+        if(topic != 0){
+            activities = activityRepo.findByTitleLikeIgnoreCaseAndTopicId(a, topic, pageable);
+        }else if(!districtId.equals("0")){
+            activities = activityRepo.findByTitleLikeIgnoreCaseAndCommune_District_DistrictId(a, districtId, pageable);
+        }
+        else {
+            activities = activityRepo.findByTitleLikeIgnoreCase(a, pageable);
+        }
         List<ActivityEntity> acts = activities.getContent();
         List<ActivityOutputModel> out = new ArrayList<>();
         for (ActivityEntity act : acts) {
-            out.add(ActivityConverter.toOutPutModel(act));
+            out.add(Converter.toOutPutModel(act));
         }
         return new ActivityPaging(activities.getNumber(), activities.getTotalElements(), activities.getTotalPages(), out);
+    }
+
+    @Override
+    public List<ActivityOutputModel> getFollowing() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String now = LocalDateTime.now().format(formatter);
+        List<ActivityEntity> activityEntities = activityRepo.findByFromDateAfter(new Date());
+        List<ActivityOutputModel> out = new ArrayList<>();
+        for(ActivityEntity a: activityEntities){
+            out.add(Converter.toOutPutModel(a));
+        }
+        return out;
     }
 }

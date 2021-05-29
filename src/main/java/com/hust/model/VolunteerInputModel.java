@@ -7,14 +7,14 @@ public class VolunteerInputModel {
     private String phoneNum;
     private Date birthDate;
     private String communeId;
-    private long userId;
+    private String gender;
 
-    public long getUserId() {
-        return userId;
+    public String getGender() {
+        return gender;
     }
 
-    public void setUserId(long userId) {
-        this.userId = userId;
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public String getFullName() {

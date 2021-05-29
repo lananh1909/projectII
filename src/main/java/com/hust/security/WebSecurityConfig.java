@@ -59,8 +59,11 @@ public class WebSecurityConfig extends org.springframework.security.config.annot
                 .antMatchers("/api/test/**").permitAll()
                 .antMatchers("/address/**").permitAll()
                 .antMatchers("/activity/**").permitAll()
-                .antMatchers("/files/**").permitAll()
+                .antMatchers("/attend/**").permitAll()
+                .antMatchers("/file/**").permitAll()
                 .antMatchers("/blog/**").permitAll()
+                .antMatchers("/topic/**").permitAll()
+                .antMatchers("/volunteer/**").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

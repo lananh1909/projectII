@@ -9,4 +9,6 @@ public interface TopicRepo extends JpaRepository<TopicEntity, Long> {
     List<TopicEntity> findAll();
     TopicEntity save(TopicEntity topic);
     TopicEntity findById(long id);
+    boolean existsByTopicName(String topicName);
+    boolean existsByTopicNameAndIdNot(String name, long id);
 }

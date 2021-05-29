@@ -1,41 +1,69 @@
 package com.hust.controller;
 
+import com.hust.entity.UserEntity;
 import com.hust.entity.id.AttendId;
+import com.hust.exception.UserNotFoundException;
 import com.hust.model.AttendInputModel;
+import com.hust.repo.UserRepo;
 import com.hust.service.AttendService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
+@RequestMapping("/attend")
 public class AttendAPIController {
     @Autowired
     AttendService attendService;
 
+    @Autowired
+    UserRepo userRepo;
+
     @PreAuthorize("hasRole('USER')")
-    @PostMapping("/insert-attend")
+    @PostMapping("/insert")
     public ResponseEntity<?> insertAttend(Principal principal, @RequestBody AttendInputModel input){
-        return ResponseEntity.ok().body(attendService.save(input));
+        UserEntity user = userRepo.findByUsername((principal.getName()));
+        if(user == null) try {
+            throw new UserNotFoundException();
+        } catch (UserNotFoundException e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("User not found!");
+        }
+        return ResponseEntity.ok().body(attendService.save(input, user.getId()));
     }
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/get-all-attend/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<?> getAllAttend(Principal principal, @PathVariable("id") long id){
         return ResponseEntity.ok().body(attendService.findByActivity(id));
     }
 
     @PreAuthorize("hasRole('USER')")
-    @PutMapping("/update-attend")
-    public ResponseEntity<?> updateAttend(@RequestBody AttendInputModel input){
-        return ResponseEntity.ok().body(attendService.save(input));
+    @GetMapping("/activities")
+    public ResponseEntity<?> getByVolunteer(Principal principal){
+        UserEntity user = userRepo.findByUsername((principal.getName()));
+        if(user == null) try {
+            throw new UserNotFoundException();
+        } catch (UserNotFoundException e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("User not found!");
+        }
+        return ResponseEntity.ok().body(attendService.findByVolunteer(user.getId()));
     }
 
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    @DeleteMapping("/delete-attend")
-    public void deleteAttend(@RequestBody AttendId input){
+    @DeleteMapping("/delete")
+    public void deleteAttend(Authentication authentication, @RequestBody AttendId input){
+        if(authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER"))){
+            UserEntity user = userRepo.findByUsername(authentication.getName());
+            if(user.getId() != input.getVolunteer())
+                return;
+        }
         attendService.deleteAttend(input);
     }
 }

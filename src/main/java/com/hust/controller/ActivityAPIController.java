@@ -21,48 +21,44 @@ public class ActivityAPIController {
     ActivityService activityService;
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/create-activity")
+    @PostMapping("/create")
     public ResponseEntity<?> createActivity(Principal principal, @RequestBody ActivityInputModel input){
         return ResponseEntity.ok().body(activityService.save(input));
     }
 
-    @GetMapping("/get-all-activity")
-    public ResponseEntity<?> getAllActivity(Principal principal){
-        return ResponseEntity.ok().body(activityService.findAll());
-    }
-
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/update-activity/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<?> updateActivity(@RequestBody ActivityInputModel input, @PathVariable("id") long id){
         return ResponseEntity.ok().body(activityService.save(input, id));
     }
 
-    @GetMapping("/get-activity/{id}")
+    @GetMapping("/get/{id}")
     public ResponseEntity<?> getActivity(@PathVariable("id") long id){
         return ResponseEntity.ok().body(activityService.getActiviy(id));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/delete-activity")
+    @DeleteMapping("/delete")
     public void deleteActivity(@RequestBody long id){
         activityService.delete(id);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/get-volunteers")
-    public ResponseEntity<?> getVolunteers(@RequestBody long activityId){
-        return ResponseEntity.ok().body(activityService.getVolunteers(activityId));
-    }
-
-    @GetMapping("/activities")
+    @GetMapping("/get")
     public ResponseEntity<?> getAtivities(@RequestParam(required = false) String title,
+                                          @RequestParam(defaultValue = "0") long topic,
+                                          @RequestParam(defaultValue = "0") String districtId,
                                           @RequestParam(defaultValue = "0") int page,
                                           @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
         if(title == null){
-            return ResponseEntity.ok().body(activityService.findAll(pageable));
+            return ResponseEntity.ok().body(activityService.findAll(topic, districtId, pageable));
         } else {
-            return ResponseEntity.ok().body(activityService.findAllByTitle(title, pageable));
+            return ResponseEntity.ok().body(activityService.findAllByTitle(title, topic, districtId, pageable));
         }
+    }
+
+    @GetMapping("/following")
+    public ResponseEntity<?> getFollowingActivity(){
+        return ResponseEntity.ok().body(activityService.getFollowing());
     }
 }

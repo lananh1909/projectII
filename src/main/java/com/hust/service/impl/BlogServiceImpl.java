@@ -1,7 +1,6 @@
 package com.hust.service.impl;
 
-import com.hust.config.JpaAuditingConfig;
-import com.hust.converter.BlogConverter;
+import com.hust.converter.Converter;
 import com.hust.entity.ActivityEntity;
 import com.hust.entity.BlogEntity;
 import com.hust.entity.ListImage;
@@ -51,6 +50,7 @@ public class BlogServiceImpl implements BlogService {
             img.setImage(fileDBRepo.findById(i));
             imgs.add(img);
         }
+        blog.setImages(imgs);
         blog = blogRepo.save(blog);
         return blog;
     }
@@ -60,15 +60,17 @@ public class BlogServiceImpl implements BlogService {
         BlogEntity blog = blogRepo.findOneById(id);
         blog.setTitle(input.getTitle());
         blog.setContent(input.getContent());
-        blog = blogRepo.save(blog);
         List<ListImage> list = listImageRepo.findByBlogId(id);
         listImageRepo.deleteAll(list);
+        List<ListImage> imgs = new ArrayList<>();
         for(long i: input.getListImage()){
             ListImage img = new ListImage();
             img.setBlog(blog);
             img.setImage(fileDBRepo.findById(i));
-            listImageRepo.save(img);
+            imgs.add(img);
         }
+        blog.setImages(imgs);
+        blog = blogRepo.save(blog);
         for(ListImage i: list){
             List<ActivityEntity> acts = activityRepo.findByImage(i.getImage());
             List<ListImage> re = listImageRepo.findByImageId(i.getImage().getId());
@@ -103,7 +105,7 @@ public class BlogServiceImpl implements BlogService {
             for(ListImage i: img){
                 id.add(i.getImage().getId());
             }
-            out.add(BlogConverter.toOutputModel(b, id));
+            out.add(Converter.toOutputModel(b, id));
         }
         return new BlogPaging(blogs.getNumber(), blogs.getTotalElements(), blogs.getTotalPages(), out);
     }
@@ -121,7 +123,7 @@ public class BlogServiceImpl implements BlogService {
             for(ListImage i: img){
                 id.add(i.getImage().getId());
             }
-            out.add(BlogConverter.toOutputModel(b, id));
+            out.add(Converter.toOutputModel(b, id));
         }
         return new BlogPaging(blogs.getNumber(), blogs.getTotalElements(), blogs.getTotalPages(), out);
     }
@@ -134,6 +136,6 @@ public class BlogServiceImpl implements BlogService {
         for(ListImage i: img){
             imgs.add(i.getImage().getId());
         }
-        return BlogConverter.toOutputModel(blog, imgs);
+        return Converter.toOutputModel(blog, imgs);
     }
 }
