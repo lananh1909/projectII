@@ -11,7 +11,6 @@ import java.util.List;
 
 @Service
 public interface ActivityService {
-    List<ActivityOutputModel> findAll();
     ActivityEntity save(ActivityInputModel input);
     ActivityEntity save(ActivityInputModel input, long id);
     void delete(long id);

@@ -2,6 +2,7 @@ package com.hust.service;
 
 import com.hust.entity.AttendEntity;
 import com.hust.entity.id.AttendId;
+import com.hust.exception.ItemNotFoundException;
 import com.hust.model.AttendInputModel;
 import com.hust.model.StatisticalOutput;
 import org.springframework.stereotype.Service;
@@ -16,4 +17,5 @@ public interface AttendService {
     List<AttendEntity> findByActivity(long id);
     List<AttendEntity> findByVolunteer(long id);
     List<StatisticalOutput> getStatistic();
+    int changeState(AttendId id, int state) throws ItemNotFoundException;
 }

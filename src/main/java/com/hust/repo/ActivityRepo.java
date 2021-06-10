@@ -14,7 +14,6 @@ import java.util.List;
 
 @Transactional
 public interface ActivityRepo extends JpaRepository<ActivityEntity, Long> {
-    List<ActivityEntity> findAll();
     ActivityEntity save(ActivityEntity act);
     ActivityEntity findById(long id);
     List<ActivityEntity> findByImage(FileDB image);
@@ -26,6 +25,6 @@ public interface ActivityRepo extends JpaRepository<ActivityEntity, Long> {
     long countByTopicId(long id);
 
 
-    @Query("select a from ActivityEntity a where DATE(fromDate) >= DATE(:date)")
+    @Query("select a from ActivityEntity a where DATE(fromDate) >= DATE(:date) order by fromDate")
     List<ActivityEntity> findByFromDateAfter(@Param(value = "date") Date date);
 }

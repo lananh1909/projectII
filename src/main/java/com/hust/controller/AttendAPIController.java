@@ -1,13 +1,18 @@
 package com.hust.controller;
 
+import com.hust.entity.AttendEntity;
 import com.hust.entity.UserEntity;
 import com.hust.entity.id.AttendId;
+import com.hust.exception.ItemNotFoundException;
 import com.hust.exception.UserNotFoundException;
 import com.hust.model.AttendInputModel;
+import com.hust.model.ChangeStateInputModel;
 import com.hust.repo.UserRepo;
 import com.hust.service.AttendService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -25,6 +30,9 @@ public class AttendAPIController {
     @Autowired
     UserRepo userRepo;
 
+    @Autowired
+    JavaMailSender mailSender;
+
     @PreAuthorize("hasRole('USER')")
     @PostMapping("/insert")
     public ResponseEntity<?> insertAttend(Principal principal, @RequestBody AttendInputModel input){
@@ -35,7 +43,14 @@ public class AttendAPIController {
             e.printStackTrace();
             return ResponseEntity.badRequest().body("User not found!");
         }
-        return ResponseEntity.ok().body(attendService.save(input, user.getId()));
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(user.getEmail());
+        message.setSubject("Xác nhận đăng ký hoạt động");
+        AttendEntity attendEntity = attendService.save(input, user.getId());
+        String content = "Cảm ơn bạn đã đăng ký tham gia hoạt động \"" + attendEntity.getActivity().getTitle() + "\"";
+        message.setText(content);
+        this.mailSender.send(message);
+        return ResponseEntity.ok().body(attendEntity);
     }
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/get/{id}")
@@ -65,5 +80,16 @@ public class AttendAPIController {
                 return;
         }
         attendService.deleteAttend(input);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/change-state")
+    public ResponseEntity<?> changeState(@RequestBody ChangeStateInputModel input){
+        try{
+            int state = attendService.changeState(new AttendId(input.getActId(), input.getVolId()), input.getState());
+            return ResponseEntity.ok().body(state);
+        } catch (ItemNotFoundException ex){
+            return ResponseEntity.badRequest().body("Item not found");
+        }
     }
 }

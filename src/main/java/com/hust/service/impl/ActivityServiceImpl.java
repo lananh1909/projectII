@@ -46,16 +46,6 @@ public class ActivityServiceImpl implements ActivityService {
     ListImageRepo listImageRepo;
 
     @Override
-    public List<ActivityOutputModel> findAll() {
-        List<ActivityEntity> acts = activityRepo.findAll();
-        List<ActivityOutputModel> out = new ArrayList<>();
-        for(ActivityEntity a: acts){
-            out.add(Converter.toOutPutModel(a));
-        }
-        return out;
-    }
-
-    @Override
     public ActivityEntity save(ActivityInputModel input) {
         ActivityEntity act = new ActivityEntity();
         act.setTitle(input.getTitle());

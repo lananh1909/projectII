@@ -3,6 +3,7 @@ package com.hust.service.impl;
 import com.hust.entity.ActivityEntity;
 import com.hust.entity.AttendEntity;
 import com.hust.entity.id.AttendId;
+import com.hust.exception.ItemNotFoundException;
 import com.hust.model.AttendInputModel;
 import com.hust.model.StatisticalOutput;
 import com.hust.repo.ActivityRepo;
@@ -36,12 +37,14 @@ public class AttendServiceImpl implements AttendService {
         AttendEntity attend = attendRepo.findByActivityIdAndVolunteerId(input.getActivityId(), id);
         if(attend != null){
             attend.setSkill(input.getSkill());
+            attend.setState(input.getState());
             attendRepo.save(attend);
         } else {
             attend = new AttendEntity();
             attend.setVolunteer(volunteerRepo.findByUserId(id));
             attend.setActivity(activityRepo.findById(input.getActivityId()));
             attend.setSkill(input.getSkill());
+            attend.setState(input.getState());
             attend = attendRepo.save(attend);
         }
         return attend;
@@ -65,5 +68,14 @@ public class AttendServiceImpl implements AttendService {
     @Override
     public List<StatisticalOutput> getStatistic() {
         return customRepo.getCountAttend();
+    }
+
+    @Override
+    public int changeState(AttendId id, int state) throws ItemNotFoundException {
+        AttendEntity attend = attendRepo.findByActivityIdAndVolunteerId(id.getActivity(), id.getVolunteer());
+        if(attend == null) throw new ItemNotFoundException();
+        attend.setState(state);
+        attendRepo.save(attend);
+        return state;
     }
 }

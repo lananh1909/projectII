@@ -6,6 +6,15 @@ public class AttendId implements Serializable {
     private long activity;
     private long volunteer;
 
+    public AttendId(){
+
+    }
+
+    public AttendId(long activity, long volunteer) {
+        this.activity = activity;
+        this.volunteer = volunteer;
+    }
+
     public long getActivity() {
         return activity;
     }

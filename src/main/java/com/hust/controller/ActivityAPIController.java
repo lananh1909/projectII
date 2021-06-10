@@ -6,6 +6,7 @@ import com.hust.service.ActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +50,7 @@ public class ActivityAPIController {
                                           @RequestParam(defaultValue = "0") String districtId,
                                           @RequestParam(defaultValue = "0") int page,
                                           @RequestParam(defaultValue = "10") int size){
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("fromDate").descending());
         if(title == null){
             return ResponseEntity.ok().body(activityService.findAll(topic, districtId, pageable));
         } else {
