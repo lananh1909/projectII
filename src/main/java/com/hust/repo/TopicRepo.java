@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
+@Transactional
 public interface TopicRepo extends JpaRepository<TopicEntity, Long> {
     List<TopicEntity> findAll();
     TopicEntity save(TopicEntity topic);
