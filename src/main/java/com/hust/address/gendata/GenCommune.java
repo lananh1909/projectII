@@ -12,8 +12,8 @@ public class GenCommune {
 		try {
 
 			Class.forName("org.postgresql.Driver");
-			Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/springboot", "postgres","0978122361");
-			
+			String url = "jdbc:postgresql://ec2-54-224-194-214.compute-1.amazonaws.com:5432/dam6id0cbjikdc?user=dtgmwctdgppvpi&password=10708d94667e51f185e91e67af37946652c782343fd4552318c009b27ea2b6a5&sslmode=require";
+			Connection connection = DriverManager.getConnection(url);
 			Statement start = connection.createStatement();
 			System.out.println("connected...");
 			Scanner input = new Scanner(new File("d:/Database/sscm/app/data/xa.txt"));
