@@ -43,13 +43,7 @@ public class AttendAPIController {
             e.printStackTrace();
             return ResponseEntity.badRequest().body("User not found!");
         }
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(user.getEmail());
-        message.setSubject("Xác nhận đăng ký hoạt động");
         AttendEntity attendEntity = attendService.save(input, user.getId());
-        String content = "Cảm ơn bạn đã đăng ký tham gia hoạt động \"" + attendEntity.getActivity().getTitle() + "\"";
-        message.setText(content);
-        this.mailSender.send(message);
         return ResponseEntity.ok().body(attendEntity);
     }
     @PreAuthorize("hasRole('ADMIN')")

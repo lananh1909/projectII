@@ -42,7 +42,7 @@ public class ActivityEntity extends BaseEntity{
     @JsonIgnore
     private List<AttendEntity> attendees = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "image", referencedColumnName = "id")
     private FileDB image;
 
